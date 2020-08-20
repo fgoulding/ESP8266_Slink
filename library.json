@@ -1,0 +1,17 @@
+{
+  "name": "ESP8266_Slink",
+  "keywords": "SONY, S-LINK, Control-A1, ESP8266",
+  "description": "Timer-based Arduino SONY S-LINK/Control-A1 Protocol Library for ESP8266",
+  "repository":
+  {
+    "type": "git",
+    "url": "https://github.com/tylerGoulding/ESP8266_Slink.git"
+  },
+  "version": "1.0.0",
+  "authors": {
+    "name": "tylerGoulding",
+    "url": "https://github.com/tylerGoulding"
+  },
+  "frameworks": "arduino",
+  "platforms": "*"
+}
