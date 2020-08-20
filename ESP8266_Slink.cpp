@@ -46,8 +46,7 @@ volatile static int slink_pin;
  * LOCAL FUNCTIONS
  ****************************************************************************************
  */
-void handle_send_command();
-
+static void handle_send_command();
 /**
  * @brief enable a single shot timer to a specified callback
  *
@@ -97,7 +96,7 @@ static void ICACHE_RAM_ATTR line_check() {
     handle_send_command();
     return;
   } else {
-    enableSingleShotTimer(SLINK_LOOP_DELAY_CYCLES, lineCheck);
+    enableSingleShotTimer(SLINK_LOOP_DELAY_CYCLES, line_check);
   }
 }
 
@@ -163,8 +162,8 @@ static void ICACHE_RAM_ATTR write_bytes() {
  *
  */
 static void ICACHE_RAM_ATTR handle_send_command() {
-  static bool write_sync = true;
-  static bool line_check = true;
+  static bool do_write_sync = true;
+  static bool do_line_check = true;
   // if we are at the end of our message, break.
   if (write_arr_idx >= write_size) {
 #if (ESP8266_SLINK_DEBUG)
@@ -173,21 +172,21 @@ static void ICACHE_RAM_ATTR handle_send_command() {
 #endif //(ESP8266_SLINK_DEBUG)
     pinMode(slink_pin, INPUT);
     timer1_disable();
-    write_sync = true;
-    line_check = true;
+    do_write_sync = true;
+    do_line_check = true;
     return;
-  } else if (line_check) {
+  } else if (do_line_check) {
 #if (ESP8266_SLINK_DEBUG)
-    Serial.println("ESP8266_Slink:  ----- ----- lineCheck");
+    Serial.println("ESP8266_Slink:  ----- ----- line_check");
 #endif
     pinMode(slink_pin, INPUT);
-    line_check = false;
+    do_line_check = false;
     line_check();
-  } else if (write_sync) {
+  } else if (do_write_sync) {
 #if (ESP8266_SLINK_DEBUG)
     Serial.println("ESP8266_Slink:  ----- ----- write_sync");
 #endif //(ESP8266_SLINK_DEBUG)
-    write_sync = false;
+    do_write_sync = false;
     pinMode(slink_pin, OUTPUT);
     write_sync();
   } else if (write_arr_idx < write_size) {
