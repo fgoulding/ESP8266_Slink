@@ -143,7 +143,6 @@ static void ICACHE_RAM_ATTR write_bytes() {
       bool isOne = (write_byte & (1 << write_byte_idx));
       mark_delimiter = true;
       digitalWrite(slink_pin, LOW);
-      Serial.println(isOne);
       enableSingleShotTimer((isOne) ? SLINK_MARK_ONE_CYCLES
                                     : SLINK_MARK_ZERO_CYCLES,
                             write_bytes);
