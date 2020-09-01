@@ -16,7 +16,37 @@
  ****************************************************************************************
  */
 // DEBUG - set to 1 for debug prints. This may mess up timing.
-#define ESP8266_SLINK_DEBUG 0
+#define ESP8266_SLINK_DEBUG 1
+
+#if (ESP8266_SLINK_DEBUG)
+
+#define SLINK_DBG(value) do {    \
+      Serial.print(value);       \
+  } while (0)
+
+#define SLINK_DBG_LN(value) do { \
+      Serial.println(value);     \
+  } while (0)
+
+#else
+// force the compiler to verify that fmt is correct..
+// but code will be optimized out by the compiler as well.
+#define SLINK_DBG(value) do { \
+    if (0) { \
+      Serial.print(value); \
+    } \
+  } while (0)
+
+// force the compiler to verify that fmt is correct..
+// but code will be optimized out by the compiler as well.
+#define SLINK_DBG_LN(value) do { \
+    if (0) { \
+      Serial.println(value); \
+    } \
+  } while (0)
+
+#endif // (ESP8266_SLINK_DEBUG)
+
 
 /// Max count the ESP8266 can handle for timer1.
 #define MAX_ESP8266_TIMER_COUNT 8388607
@@ -60,10 +90,7 @@ static bool enableSingleShotTimer(uint32_t cycles, timer_callback callback) {
   if (cycles > MAX_ESP8266_TIMER_COUNT) {
     return false;
   }
-#if (ESP8266_SLINK_DEBUG)
-  Serial.println("ESP8266_Slink: prog timer, count = " + String(_timerCount));
-#endif //(ESP8266_SLINK_DEBUG)
-
+  SLINK_DBG_LN("ESP8266_Slink: prog timer, count = " + String(cycles));
   timer1_attachInterrupt(callback);
   timer1_write(cycles);
   // Interrupt on EDGE, single
@@ -76,9 +103,7 @@ static bool enableSingleShotTimer(uint32_t cycles, timer_callback callback) {
  *
  */
 static void ICACHE_RAM_ATTR line_check() {
-#if (ESP8266_SLINK_DEBUG)
-  Serial.println("ESP8266_Slink: line check.");
-#endif //(ESP8266_SLINK_DEBUG)
+  SLINK_DBG_LN("ESP8266_Slink: line check.");
   static bool start_line_check = true;
   static unsigned long Start;
   static unsigned long beginTimeout;
@@ -106,10 +131,7 @@ static void ICACHE_RAM_ATTR line_check() {
  *
  */
 static void ICACHE_RAM_ATTR write_sync() {
-#if (ESP8266_SLINK_DEBUG)
-  Serial.print("write_sync: ");
-  Serial.println(micros());
-#endif //(ESP8266_SLINK_DEBUG)
+  SLINK_DBG("write_sync: " + String(micros()));
   static bool sync_mark_delimiter = false;
   if (sync_mark_delimiter) {
     digitalWrite(slink_pin, HIGH); // release the default HIGH state
@@ -165,33 +187,25 @@ static void ICACHE_RAM_ATTR handle_send_command() {
   static bool do_line_check = true;
   // if we are at the end of our message, break.
   if (write_arr_idx >= write_size) {
-#if (ESP8266_SLINK_DEBUG)
-    Serial.print("DONE: ");
-    Serial.println(micros());
-#endif //(ESP8266_SLINK_DEBUG)
+    SLINK_DBG("DONE: ");
+    SLINK_DBG_LN(micros());
     pinMode(slink_pin, INPUT);
     timer1_disable();
     do_write_sync = true;
     do_line_check = true;
     return;
   } else if (do_line_check) {
-#if (ESP8266_SLINK_DEBUG)
-    Serial.println("ESP8266_Slink:  ----- ----- line_check");
-#endif
+    SLINK_DBG_LN("ESP8266_Slink:  ----- ----- line_check");
     pinMode(slink_pin, INPUT);
     do_line_check = false;
     line_check();
   } else if (do_write_sync) {
-#if (ESP8266_SLINK_DEBUG)
-    Serial.println("ESP8266_Slink:  ----- ----- write_sync");
-#endif //(ESP8266_SLINK_DEBUG)
+    SLINK_DBG_LN("ESP8266_Slink:  ----- ----- write_sync");
     do_write_sync = false;
     pinMode(slink_pin, OUTPUT);
     write_sync();
   } else if (write_arr_idx < write_size) {
-#if (ESP8266_SLINK_DEBUG)
-    Serial.println("ESP8266_Slink:  ----- ----- write_bytes");
-#endif //(ESP8266_SLINK_DEBUG)
+    SLINK_DBG_LN("ESP8266_Slink:  ----- ----- write_bytes");
     pinMode(slink_pin, OUTPUT);
     write_bytes();
   } else {
@@ -215,33 +229,25 @@ void Slink::sendCommand(uint8_t deviceId, uint8_t commandId1, int commandId2,
   // TODO: double buffer to store next command.
   write_arr[0] = (volatile uint8_t)deviceId;
   write_arr[1] = (volatile uint8_t)commandId1;
-#if (ESP8266_SLINK_DEBUG)
-  Serial.print("Send command: [");
-  Serial.print((uint8_t)write_arr[0]);
-  Serial.print(", ");
-  Serial.print((uint8_t)write_arr[1]);
-#endif //(ESP8266_SLINK_DEBUG)
+  SLINK_DBG("Send command: [");
+  SLINK_DBG((uint8_t)write_arr[0]);
+  SLINK_DBG(", ");
+  SLINK_DBG((uint8_t)write_arr[1]);
   write_size = 2;
   if (commandId2 >= 0) {
     write_size = 3;
     write_arr[2] = commandId2;
-#if (ESP8266_SLINK_DEBUG)
-    Serial.print(", ");
-    Serial.print((uint8_t)write_arr[2]);
-#endif //(ESP8266_SLINK_DEBUG)
+    SLINK_DBG(", ");
+    SLINK_DBG((uint8_t)write_arr[2]);
   }
   if (commandId3 >= 0) {
     write_size = 4;
     write_arr[3] = commandId2;
-#if (ESP8266_SLINK_DEBUG)
-    Serial.print(", ");
-    Serial.print((uint8_t)write_arr[3]);
-#endif //(ESP8266_SLINK_DEBUG)
+    SLINK_DBG(", ");
+    SLINK_DBG((uint8_t)write_arr[3]);  
   }
-#if (ESP8266_SLINK_DEBUG)
-  Serial.print("]; ");
-  Serial.println(micros());
-#endif //(ESP8266_SLINK_DEBUG)
+  SLINK_DBG("]; ");
+  SLINK_DBG_LN(micros());
   write_arr_idx = 0;
   write_byte_idx = 7;
   handle_send_command();
