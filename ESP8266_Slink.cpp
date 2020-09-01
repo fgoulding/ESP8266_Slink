@@ -16,37 +16,40 @@
  ****************************************************************************************
  */
 // DEBUG - set to 1 for debug prints. This may mess up timing.
-#define ESP8266_SLINK_DEBUG 1
+#define ESP8266_SLINK_DEBUG (0)
 
 #if (ESP8266_SLINK_DEBUG)
 
-#define SLINK_DBG(value) do {    \
-      Serial.print(value);       \
+#define SLINK_DBG(value)                                                       \
+  do {                                                                         \
+    Serial.print(value);                                                       \
   } while (0)
 
-#define SLINK_DBG_LN(value) do { \
-      Serial.println(value);     \
+#define SLINK_DBG_LN(value)                                                    \
+  do {                                                                         \
+    Serial.println(value);                                                     \
   } while (0)
 
 #else
 // force the compiler to verify that fmt is correct..
 // but code will be optimized out by the compiler as well.
-#define SLINK_DBG(value) do { \
-    if (0) { \
-      Serial.print(value); \
-    } \
+#define SLINK_DBG(value)                                                       \
+  do {                                                                         \
+    if (0) {                                                                   \
+      Serial.print(value);                                                     \
+    }                                                                          \
   } while (0)
 
 // force the compiler to verify that fmt is correct..
 // but code will be optimized out by the compiler as well.
-#define SLINK_DBG_LN(value) do { \
-    if (0) { \
-      Serial.println(value); \
-    } \
+#define SLINK_DBG_LN(value)                                                    \
+  do {                                                                         \
+    if (0) {                                                                   \
+      Serial.println(value);                                                   \
+    }                                                                          \
   } while (0)
 
 #endif // (ESP8266_SLINK_DEBUG)
-
 
 /// Max count the ESP8266 can handle for timer1.
 #define MAX_ESP8266_TIMER_COUNT 8388607
@@ -244,7 +247,7 @@ void Slink::sendCommand(uint8_t deviceId, uint8_t commandId1, int commandId2,
     write_size = 4;
     write_arr[3] = commandId2;
     SLINK_DBG(", ");
-    SLINK_DBG((uint8_t)write_arr[3]);  
+    SLINK_DBG((uint8_t)write_arr[3]);
   }
   SLINK_DBG("]; ");
   SLINK_DBG_LN(micros());
